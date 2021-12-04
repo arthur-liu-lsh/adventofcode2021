@@ -22,7 +22,17 @@ namespace D1
                 }
             }
 
-            Console.WriteLine(count);
+            Console.WriteLine("Single count: " + count.ToString());
+
+            int count2 = 0;
+
+            for (int i = 1; i<n-2; i++) {
+                if ((depths[i-1] + depths[i] + depths[i+1]) < (depths[i] + depths[i+1] + depths[i+2])) {
+                    count2++;
+                }
+            }
+
+            Console.WriteLine("Three-measurement sliding window: " + count2.ToString());
         }
     }
 }
