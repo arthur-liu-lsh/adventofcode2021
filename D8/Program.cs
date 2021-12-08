@@ -36,6 +36,28 @@ namespace D8
             Console.WriteLine("Part 1:");
             Console.WriteLine($"Occurences of 1, 4, 7, and 8: {count}");
             Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
+
+
+            // Part 2
+            sw.Restart();
+
+            int sum = 0;
+
+            for (int i = 0; i < n; i++) {
+                DigitDecoder decoder = new DigitDecoder(inputs[i].Select(x => x).Take(10).Select(x => new Digit(x)).ToArray());
+                decoder.Solve();
+                string s = "";
+                for(int j = 10; j < 14; j++) {
+                    s += decoder.DecodeToString(inputs[i][j]);
+                }
+                sum += int.Parse(s);
+            }
+
+            sw.Stop();
+
+            Console.WriteLine("\nPart 2:");
+            Console.WriteLine($"Sum of all outputs: {sum}");
+            Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
         }
     }
 }
