@@ -16,7 +16,26 @@ namespace D8
 
             string[][] inputs = lines.Select(x => x.Split(new char[] {' ', '|'}, StringSplitOptions.RemoveEmptyEntries)).ToArray();
 
-            
+
+            // Part 1
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            int count = 0;
+
+            foreach (string[] line in inputs) {
+                for (int i = 10; i < m; i++) {
+                    if (line[i].Length == 2 || line[i].Length == 3 || line[i].Length == 4 || line[i].Length == 7) {
+                        count++;
+                    }
+                }
+            }
+
+            sw.Stop();
+
+            Console.WriteLine("Part 1:");
+            Console.WriteLine($"Occurences of 1, 4, 7, and 8: {count}");
+            Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
         }
     }
 }
