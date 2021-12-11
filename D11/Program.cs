@@ -47,12 +47,44 @@ namespace D11
                 flashes += table.Cast<int>().Sum(x => x == 0 ? 1 : 0);
             }
 
+
             sw.Stop();
 
             Console.WriteLine("Part 1:");
-            Console.WriteLine($"Sum of risk levels: {flashes}");
+            Console.WriteLine($"Number of flashes: {flashes}");
             Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
+
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < m; j++) {
+                    table[i,j] = (int)Char.GetNumericValue(lines[i][j]);
+                }
+            }
+            
+            // Part 2
+            sw.Restart();
+
+            int s = 0;
+            while (table.Cast<int>().Sum(x => x == 0 ? 1 : 0) != n*m) {
+                bool[,] isChecked = new bool[n,m];
+                for (int i = 0; i < n; i++) {
+                    for (int j = 0; j < m; j++) {
+                        table[i,j] += 1;
+                    }
+                }
+                for (int i = 0; i < n; i++) {
+                    for (int j = 0; j < m; j++) {
+                        Propagate(table,isChecked,i,j);
+                    }
+                }
+                s++;
+            }
+
+            Console.WriteLine("\nPart 2:");
+            Console.WriteLine($"First step where all octopuses flash: {s}");
+            Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
+
         }
+
 
         static void Propagate(int[,] table, bool[,] isChecked, int i, int j) {
             int value = table[i,j];
