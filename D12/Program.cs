@@ -26,13 +26,25 @@ namespace D12
             // Part 1
             var sw = new Stopwatch();
             sw.Start();
-            
-            int paths1 = graph.CountPaths("start", "end", new HashSet<string> { "start" });
+
+            int paths1 = graph.CountPaths("start", "end", new Dictionary<string, int> {["start"] = 1}, 1);
 
             sw.Stop();
 
             Console.WriteLine("Part 1:");
             Console.WriteLine($"Number of paths: {paths1}");
+            Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
+
+
+
+            sw.Restart();
+
+            int paths2 = graph.CountPaths("start", "end", new Dictionary<string, int> {["start"] = 1}, 2);
+
+            sw.Stop();
+
+            Console.WriteLine("\nPart 2:");
+            Console.WriteLine($"Number of paths: {paths2}");
             Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
         }
     }

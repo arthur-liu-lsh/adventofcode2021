@@ -31,18 +31,31 @@ namespace D12
             Console.WriteLine(string.Join("\n", vertices.Select(kvp => $"{kvp.Key}: {string.Join(",", kvp.Value)}")));
         }
 
-        public int CountPaths(string src, string dest, HashSet<string> seen) {
+        public int CountPaths(string src, string dest, Dictionary<string,int> seen, int maxVisits) {
             if (src == dest) {
                 return 1;
             }
             else {
                 int sum = 0;
-                foreach (string neighbour in vertices[src].Where(vertex => !seen.Contains(vertex))) {
-                    var newSeen = new HashSet<string>(seen);
-                    if (neighbour.All(char.IsLower)) {
-                        newSeen.Add(neighbour);
+                foreach (string neighbour in vertices[src]) {
+                    if (seen.ContainsKey(neighbour)) {
+                        if (seen.Values.Contains(maxVisits) || neighbour == "start" || neighbour == "end") {
+                            continue;
+                        }
                     }
-                    sum += CountPaths(neighbour,dest,newSeen);
+                    var newSeen = new Dictionary<string, int>(seen);
+                    
+                    if (neighbour.All(char.IsLower))
+                    {
+                        if (!newSeen.ContainsKey(neighbour)) {
+                            newSeen.Add(neighbour, 1);
+                        }
+                        else {
+                            newSeen[neighbour] += 1;
+                        }
+                    }
+
+                    sum += CountPaths(neighbour, dest, newSeen, maxVisits);
                 }
                 return sum;
             }
