@@ -387,3 +387,6 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+input.txt
+testinput.txt
