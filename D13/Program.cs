@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
 
@@ -60,14 +61,25 @@ namespace D13
             Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
 
             // Part 2
+
+            var coordsSet = new HashSet<Tuple<int,int>>();
+            foreach (int[] coordinate in coordinates) {
+                coordsSet.Add(Tuple.Create<int,int>(coordinate[1],coordinate[0]));
+            }
+
             sw.Restart();
 
+            // foreach(string[] instruction in instructions) {
+            //     paper = Fold(paper, instruction[2]);
+            // }
+
             foreach(string[] instruction in instructions) {
-                paper = Fold(paper, instruction[2]);
+                coordsSet = Fold(coordsSet, instruction[2], int.Parse(instruction[3]));
             }
 
             Console.WriteLine("\nPart 2:");
-            Print(paper);
+            Print(coordsSet);
+            // Print(paper);
             Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
 
         }
@@ -78,6 +90,24 @@ namespace D13
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < m; j++) {
                     Console.Write(table[i][j] ? "█" : " ");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        static void Print(HashSet<Tuple<int,int>> coordinates) {
+            int maxY = coordinates.Max(x => x.Item1)+1;
+            int maxX = coordinates.Max(x => x.Item2)+1;
+
+            bool[,] table = new bool[maxY,maxX];
+
+            foreach (var coordinate in coordinates) {
+                table[coordinate.Item1,coordinate.Item2] = true;
+            }
+
+            for (int i = 0; i < maxY; i++) {
+                for (int j = 0; j < maxX; j++) {
+                    Console.Write(table[i,j] ? "█" : " ");
                 }
                 Console.WriteLine();
             }
@@ -114,6 +144,33 @@ namespace D13
                 }
             }
             return newTable;
+        }
+
+        static HashSet<Tuple<int,int>> Fold(HashSet<Tuple<int,int>> set, string axis, int pivot){
+            var newSet = new HashSet<Tuple<int,int>>();
+            if (axis == "y") {
+                foreach (var coordinates in set) {
+                    if (coordinates.Item1 < pivot) {
+                        newSet.Add(coordinates);
+                    }
+                    else if (coordinates.Item1 > pivot) {
+                        newSet.Add(Tuple.Create<int,int>(2*pivot-coordinates.Item1, coordinates.Item2));
+                    }
+                    // Remove coordinates where y value is equal to pivot
+                }
+            }
+            if (axis == "x") {
+                foreach (var coordinates in set) {
+                    if (coordinates.Item2 < pivot) {
+                        newSet.Add(coordinates);
+                    }
+                    else if (coordinates.Item2 > pivot) {
+                        newSet.Add(Tuple.Create<int,int>(coordinates.Item1, 2*pivot-coordinates.Item2));
+                    }
+                    // Remove coordinates where y value is equal to pivot
+                }
+            }
+            return newSet;
         }
     }
 }
