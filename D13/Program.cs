@@ -40,19 +40,24 @@ namespace D13
                 instructions[i] = line;
             }
 
-            bool[][] paper = new bool[maxY][];
-            for (int i = 0; i < maxY; i++) {
-                paper[i] = new bool[maxX];
-            }
+            // bool[][] paper = new bool[maxY][];
+            // for (int i = 0; i < maxY; i++) {
+            //     paper[i] = new bool[maxX];
+            // }
+            // foreach (int[] coordinate in coordinates) {
+            //     paper[coordinate[1]][coordinate[0]] = true;
+            // }
+            var coordsSet = new HashSet<Tuple<int,int>>();
             foreach (int[] coordinate in coordinates) {
-                paper[coordinate[1]][coordinate[0]] = true;
+                coordsSet.Add(Tuple.Create<int,int>(coordinate[1],coordinate[0]));
             }
 
             // Part 1
             var sw = new Stopwatch();
             sw.Start();
  
-            int dots = Fold(paper,instructions[0][2]).Sum(y => y.Count(x => x == true));
+            // int dots = Fold(paper,instructions[0][2]).Sum(y => y.Count(x => x == true));
+            int dots = Fold(coordsSet,instructions[0][2],int.Parse(instructions[0][3])).Count();
 
             sw.Stop();
 
@@ -62,10 +67,6 @@ namespace D13
 
             // Part 2
 
-            var coordsSet = new HashSet<Tuple<int,int>>();
-            foreach (int[] coordinate in coordinates) {
-                coordsSet.Add(Tuple.Create<int,int>(coordinate[1],coordinate[0]));
-            }
 
             sw.Restart();
 
