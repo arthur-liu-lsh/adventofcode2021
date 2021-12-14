@@ -52,8 +52,6 @@ namespace D14
 
             int[] counts1 = sequence.GroupBy(c => c).Select(x => x.Count()).OrderByDescending(x => x).ToArray();
 
-            Console.WriteLine(sum1);
-
             sw.Stop();
 
             Console.WriteLine("Part 1:");
