@@ -33,19 +33,49 @@ namespace D15
             Console.WriteLine($"Shortest distance: {distances[n-1,m-1]}");
             Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
 
-            int[,] bigTable = new int[5*n,5*m];
-            for (int ii = 0; ii < 5; ii++) {
-                for (int jj = 0; jj < 5; jj++) {
+            const int upscaleRatio = 5;
+
+            int[,] bigTable = Upscale(table, upscaleRatio);
+
+            sw.Restart();
+
+            int[,] bigDistances = Dijkstra(bigTable, 0,0);
+
+            sw.Stop();
+
+            Console.WriteLine("\nPart 2:");
+            Console.WriteLine($"Shortest distance: {bigDistances[upscaleRatio*n-1,upscaleRatio*m-1]}");
+            Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
+
+
+        }
+
+        static void Print(int[,] table) {
+            int n = table.GetLength(0);
+            int m = table.GetLength(1);
+
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < m; j++) {
+                    Console.Write(table[i,j]);
+                }
+                Console.WriteLine();
+            }
+        }
+
+        static int[,] Upscale(int[,] table, int upscaleRatio) {
+            int n = table.GetLength(0);
+            int m = table.GetLength(1);
+            int[,] bigTable = new int[upscaleRatio*n,upscaleRatio*m];
+            for (int ii = 0; ii < upscaleRatio; ii++) {
+                for (int jj = 0; jj < upscaleRatio; jj++) {
                     for (int i = 0; i < n; i++) {
                         for (int j = 0; j < m; j++) {
-                            bigTable[5*ii + i, 5*ii + j] = (table[i,j]+ii+jj-1)%9+1;
+                            bigTable[n*ii + i, m*jj + j] = (table[i,j]+ii+jj-1)%9+1;
                         }
                     }
                 }
             }
-
-            // int[,] bigDistances = Dijkstra(bigTable, 0,0);
-            // Console.WriteLine(bigDistances[5*n-1,5*m-1]);
+            return bigTable;
         }
 
         static int[,] Dijkstra(int[,] table, int beginY, int beginX) {
@@ -53,16 +83,13 @@ namespace D15
             int m = table.GetLength(1);
 
             int[,] distances = new int[n,m];
-            var vertices = new HashSet<Tuple<int, int>>();
+            
+            var modified = new HashSet<Tuple<int, int>>();
+            modified.Add(Tuple.Create<int,int>(0,0));
 
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < m; j++) {
-                    vertices.Add(Tuple.Create<int,int>(i,j));
-                }
-            }
 
-            // bool[,] vertices = new bool[n,m];
-            // int count = 0;
+            bool[,] vertices = new bool[n,m];
+            int count = 0;
 
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < m; j++) {
@@ -71,51 +98,50 @@ namespace D15
             }
             distances[beginY,beginX] = 0;
 
-            while (vertices.Count > 0) {
+            while (count < n*m) {
+                int[] v = MinVertex(distances, modified);
 
-                int min = 10*n*m;
-                int vY = 0;
-                int vX = 0;
-                // for (int i = 0; i < n; i++) {
-                //     for (int j = 0; j < m; j++) {
-                //         if (!vertices[i,j] && distances[i,j] < min) {
-                //             min = distances[i,j];
-                //             vY = i;
-                //             vX = j;
-                //         }
-                //     }
-                // }
-                foreach (var vertex in vertices) {
-                    if (distances[vertex.Item1,vertex.Item2] < min) {
-                        min = distances[vertex.Item1,vertex.Item2];
-                        vY = vertex.Item1;
-                        vX = vertex.Item2;
-                    }
+                modified.Remove(new Tuple<int, int>(v[0],v[1]));
+                count++;
+                
+                if (v[0] > 0) {
+                    distances[v[0]-1,v[1]] = UpdateDistance(distances,table,new Tuple<int,int>(v[0],v[1]), new Tuple<int,int>(v[0]-1,v[1]), modified);
                 }
-
-                vertices.Remove(Tuple.Create<int,int>(vY,vX));
-
-                // if (vY > 0) {
-                //     distances[vY-1,vX] = UpdateDistance(distances[vY,vX],distances[vY-1,vX],table[vY-1,vX]);
-                // }
-                if (vY < n-1) {
-                    distances[vY+1,vX] = UpdateDistance(distances[vY,vX],distances[vY+1,vX],table[vY+1,vX]);
+                if (v[0] < n-1) {
+                    distances[v[0]+1,v[1]] = UpdateDistance(distances,table,new Tuple<int,int>(v[0],v[1]), new Tuple<int,int>(v[0]+1,v[1]), modified);
                 }
-                // if (vX > 0) {
-                //     distances[vY,vX-1] = UpdateDistance(distances[vY,vX],distances[vY,vX-1],table[vY,vX-1]);
-                // }
-                if (vX < m-1) {
-                    distances[vY,vX+1] = UpdateDistance(distances[vY,vX],distances[vY,vX+1],table[vY,vX+1]);
+                if (v[1] > 0) {
+                    distances[v[0],v[1]-1] = UpdateDistance(distances,table,new Tuple<int,int>(v[0],v[1]), new Tuple<int,int>(v[0],v[1]-1), modified);
+                }
+                if (v[1] < m-1) {
+                    distances[v[0],v[1]+1] = UpdateDistance(distances,table,new Tuple<int,int>(v[0],v[1]), new Tuple<int,int>(v[0],v[1]+1), modified);
                 }
             }
             return distances;
         }
 
-        static int UpdateDistance(int d1, int d2, int v2) {
-            if (d2 > d1 + v2) {
-                return d1 + v2;
+        static int[] MinVertex(int[,] distances, HashSet<Tuple<int,int>> modified) {
+            int n = distances.GetLength(0);
+            int m = distances.GetLength(1);
+            int min = 10*n*m;
+            int vY = 0;
+            int vX = 0;
+            foreach (var elem in modified) {
+                if (distances[elem.Item1,elem.Item2] < min) {
+                    min = distances[elem.Item1,elem.Item2];
+                    vY = elem.Item1;
+                    vX = elem.Item2;
+                }
             }
-            return d2;
+            return new int[] {vY,vX};
+        }
+
+        static int UpdateDistance(int[,] distances, int[,] table, Tuple<int,int> v1, Tuple<int,int> v2, HashSet<Tuple<int,int>> modified) {
+            if (distances[v2.Item1,v2.Item2] > distances[v1.Item1,v1.Item2] + table[v2.Item1,v2.Item2]) {
+                modified.Add(v2);
+                return distances[v1.Item1,v1.Item2] + table[v2.Item1,v2.Item2];
+            }
+            return distances[v2.Item1,v2.Item2];
         }
     }
 }
