@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Diagnostics;
 
 namespace D17
@@ -9,8 +10,10 @@ namespace D17
         {
             var globalSw = new Stopwatch();
             globalSw.Start();
-            (int x1, int x2, int y1, int y2) target = (150, 171, -129, -70);
-            // (int x1, int x2, int y1, int y2) target = (20, 30, -10, -5);
+            string path = @"input.txt";
+            string[] lines = System.IO.File.ReadAllLines(path);
+            int[] numbers = lines[0].Split(new string[] {"target area:", "x", "y", "=", "..", ",", " "}, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
+            (int x1, int x2, int y1, int y2) target = (numbers[0], numbers[1], numbers[2], numbers[3]);
 
             var sw = new Stopwatch();
 
@@ -37,6 +40,7 @@ namespace D17
             Console.WriteLine("Part 1 and 2:");
             Console.WriteLine($"Max y position: {maxY}");
             Console.WriteLine($"Possible velocity values: {count}");
+            Console.WriteLine($"Calculations execution time: {sw.ElapsedMilliseconds} ms");
             Console.WriteLine($"Total execution time: {globalSw.ElapsedMilliseconds} ms");
         }
 
