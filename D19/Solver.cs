@@ -55,8 +55,14 @@ namespace D19
         }
 
         public void Solve() {
-            while (unsolvedScannerList.Count > 0) {
+            int n = unsolvedScannerList.Count;
+            bool[] solved = new bool[n];
+            bool[,] skip = new bool[n+1,n];
+            
+            int iter = 0;
+            while (iter < n) {
                 bool stop = false;
+
 
                 int unsolvedScannerIndex = 0;
                 int solvedScannerIndex = 0;
@@ -65,11 +71,18 @@ namespace D19
                 HashSet<Vector3> solvedBeacons = new HashSet<Vector3>();
                 Vector3 scannerPosition = new Vector3();
 
-                for (int k = 0; k < solvedScannerList.Count; k++) {
-                    for (int i = 0; i < unsolvedScannerList.Count; i++) {
+                for (int i = 0; i < unsolvedScannerList.Count; i++) {
+                    if (solved[i]) {
+                        continue;
+                    }
+                    for (int k = 0; k < solvedScannerList.Count; k++) {
+                        if (skip[i,k]) {
+                            continue;
+                        }
                         for (int j = 0; j < 24; j++) {
                             
                             if (unsolvedScannerList[i].GetTransform(j).CountSimilarities(solvedScannerList[k]) < 66) {
+                                skip[i,k] = true;
                                 continue;
                             }
                             HashSet<Vector3> unsolvedBeacons = unsolvedScannerList[i].GetTransform(j).GetBeacons();
@@ -87,6 +100,7 @@ namespace D19
                                         unsolvedScannerIndex = i;
                                         scannerRotation = j;
                                         solvedScannerIndex = k;
+                                        solved[i] = true;
                                         break;
                                     }
                                 }
@@ -111,7 +125,8 @@ namespace D19
                 AddBeacons(solvedBeacons);
                 AddScanner(scannerPosition);
 
-                unsolvedScannerList.RemoveAt(unsolvedScannerIndex);
+                // unsolvedScannerList.RemoveAt(unsolvedScannerIndex);
+                iter++;
 
             }
         }
