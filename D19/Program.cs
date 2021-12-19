@@ -47,9 +47,5 @@ namespace D19
             Console.WriteLine($"\nTotal execution time: {globalSw.ElapsedMilliseconds} ms");
 
         }
-
-        static Vector3 StringToVector(string s) {
-            return new Vector3(0,0,0);
-        }
     }
 }
