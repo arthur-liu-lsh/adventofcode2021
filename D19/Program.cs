@@ -29,11 +29,7 @@ namespace D19
                 scanners[i] = new Scanner(coordinates);
             }
 
-            Solver solver = new Solver(scanners[0]);
-
-            for (int i = 1; i < nScanners; i++) {
-                solver.AddScanner(scanners[i]);
-            }
+            Solver solver = new Solver(scanners);
 
             var sw = new Stopwatch();
             sw.Start();
@@ -43,7 +39,7 @@ namespace D19
             sw.Stop();
 
             Console.WriteLine("Part 1 and 2:");
-            Console.WriteLine($"Number of sensors: {solver.GetBeaconCount()}");
+            Console.WriteLine($"Number of beacons: {solver.GetBeaconCount()}");
             Console.WriteLine($"Biggest distance between sensors: {solver.GetMaxManhattanDistance()}");
             Console.WriteLine($"Calculations execution time: {sw.ElapsedMilliseconds} ms");
 

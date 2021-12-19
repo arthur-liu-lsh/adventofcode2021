@@ -7,41 +7,20 @@ namespace D19
 {
     class Solver
     {
+        // Position of scanners and beacons
         HashSet<Vector3> scanners;
         HashSet<Vector3> beacons;
 
-        List<Scanner> solvedScannerList;
-        List<Scanner> unsolvedScannerList;
+        Scanner [] scannerArray;
 
-        public Solver() {
+        private Solver() {
             scanners = new HashSet<Vector3>();
-            scanners.Add(new Vector3(0f,0f,0f));
             beacons = new HashSet<Vector3>();
-            solvedScannerList = new List<Scanner>();
-            unsolvedScannerList = new List<Scanner>();
         }
 
-        public Solver(Scanner origin) : this() {
-            foreach (Vector3 beacon in origin.GetBeacons()) {
-                beacons.Add(beacon);
-            }
-            solvedScannerList.Add(origin);
-        }
-
-        public Solver(Scanner origin, List<Scanner> otherScanners) : this(origin) {
-            unsolvedScannerList = otherScanners;
-        }
-
-        public void AddScanner(Scanner sc) {
-            unsolvedScannerList.Add(sc);
-        }
-
-        public List<Scanner> Transform(int transform) {
-            var transformList = new List<Scanner>();
-            foreach (Scanner sc in transformList) {
-                transformList.Add(sc.GetTransform(transform));
-            }
-            return transformList;
+        public Solver(Scanner[] newScannerArray) : this() {
+            scannerArray = newScannerArray;
+            AddBeacons(scannerArray[0].GetBeacons());
         }
 
         public void AddBeacons(HashSet<Vector3> newBeacons) {
@@ -54,80 +33,92 @@ namespace D19
             scanners.Add(scanner);
         }
 
-        public void Solve() {
-            int n = unsolvedScannerList.Count;
-            bool[] solved = new bool[n];
-            bool[,] skip = new bool[n+1,n];
-            
-            int iter = 0;
-            while (iter < n) {
-                bool stop = false;
+        /// <summary>
+        /// Function used in main Solve function, will iterate over unsolved scanners
+        /// and correct their orientation and translation, then add the scanner and beacon
+        /// positions to the scanners and beacons fields.
+        /// Uses memoization to avoid iterating again over invalid orientations and
+        /// translations.
+        /// </summary>
+        public void SolveStep(bool[] solved, bool[,] skip) {
+            int n = scannerArray.Length;
+            HashSet<Vector3> solvedBeacons = new HashSet<Vector3>();
+            Vector3 scannerPosition = new Vector3();
 
-
-                int unsolvedScannerIndex = 0;
-                int solvedScannerIndex = 0;
-                int scannerRotation = 0;
-
-                HashSet<Vector3> solvedBeacons = new HashSet<Vector3>();
-                Vector3 scannerPosition = new Vector3();
-
-                for (int i = 0; i < unsolvedScannerList.Count; i++) {
-                    if (solved[i]) {
+            for (int i = 0; i < n; i++) { // Unsolved scanners
+                if (solved[i]) { // Only check unsolved
+                    continue;
+                }
+                for (int j = 0; j < n; j++) { // Solved scanners
+                    if (!solved[j] || skip[i,j]) { // Only check solved, don't check incompatible combinations
                         continue;
                     }
-                    for (int k = 0; k < solvedScannerList.Count; k++) {
-                        if (skip[i,k]) {
+
+                    // Either we will find a suitable rotation and translation for this combination or we won't.
+                    // If we don't, we don't want to check that combination of scanners again.
+                    skip[i,j] = true;
+
+                    for (int k = 0; k < 24; k++) { // Rotations
+                        
+
+                        // It is faster to compute the absolute distances of the beacons in both scanners
+                        // than to find a valid translation
+                        // It is useful to rule out scanners that don't overlap
+                        if (scannerArray[i].GetTransform(k).CountSimilarities(scannerArray[j]) < 66) {
                             continue;
                         }
-                        for (int j = 0; j < 24; j++) {
-                            
-                            if (unsolvedScannerList[i].GetTransform(j).CountSimilarities(solvedScannerList[k]) < 66) {
-                                skip[i,k] = true;
-                                continue;
-                            }
-                            HashSet<Vector3> unsolvedBeacons = unsolvedScannerList[i].GetTransform(j).GetBeacons();
-                            HashSet<Vector3> beaconsToMatch = solvedScannerList[k].GetBeacons();
 
+                        HashSet<Vector3> unsolvedBeacons = scannerArray[i].GetTransform(k).GetBeacons();
+                        HashSet<Vector3> beaconsToMatch = scannerArray[j].GetBeacons();
 
-                            foreach (Vector3 b1 in beaconsToMatch) {
-                                foreach (Vector3 b2 in unsolvedBeacons) {
-                                    Vector3 delta = b1-b2;
-                                    var translatedBeacons = new HashSet<Vector3>(unsolvedBeacons.Select(x => x+delta));
-                                    if (CountSimilarities(beaconsToMatch, translatedBeacons) >= 12) {
-                                        stop = true;
-                                        scannerPosition = delta;
-                                        solvedBeacons = new HashSet<Vector3>(translatedBeacons);
-                                        unsolvedScannerIndex = i;
-                                        scannerRotation = j;
-                                        solvedScannerIndex = k;
-                                        solved[i] = true;
-                                        break;
-                                    }
-                                }
-                                if (stop) {
-                                    break;
+                        // Translations
+                        foreach (Vector3 b1 in beaconsToMatch) {
+                            foreach (Vector3 b2 in unsolvedBeacons) {
+                                Vector3 delta = b1-b2;
+                                var translatedBeacons = new HashSet<Vector3>(unsolvedBeacons.Select(x => x+delta));
+                                
+                                // Check if overlap
+                                if (CountSimilarities(beaconsToMatch, translatedBeacons) >= 12) {
+                                    scannerPosition = delta;
+                                    solvedBeacons = new HashSet<Vector3>(translatedBeacons);
+
+                                    // Replace scanner with correct
+                                    scannerArray[i] = new Scanner(solvedBeacons);
+
+                                    solved[i] = true; // Mark as solved
+
+                                    AddBeacons(solvedBeacons);
+                                    AddScanner(scannerPosition);
+                                    return;
                                 }
                             }
-                            if (stop) {
-                                break;
-                            }
                         }
-                        if (stop) {
-                            break;
-                        }
-                    }
-                    if (stop) {
-                        break;
                     }
                 }
+            }
 
-                solvedScannerList.Add(new Scanner(solvedBeacons));
-                AddBeacons(solvedBeacons);
-                AddScanner(scannerPosition);
+        }
 
-                // unsolvedScannerList.RemoveAt(unsolvedScannerIndex);
-                iter++;
 
+
+        /// <summary>
+        /// Main solve function, calls SolveStep until it corrects all the scanners' correct
+        /// rotations and translations.
+        /// Uses memoization to avoid iterating again over invalid orientations and
+        /// translations.
+        /// </summary>
+        public void Solve() {
+            int n = scannerArray.Length;
+
+            bool[] solved = new bool[n]; // Skip solved scanners
+            bool[,] skip = new bool[n,n]; // Skip incompatible scanner combinations
+            
+            // Scanner 0 is defined as origin, and is solved by definition
+            solved[0] = true;
+
+            // There are n-1 unsolved scanners
+            for (int i = 0; i < n-1; i++) {
+                SolveStep(solved,skip);
             }
         }
 
