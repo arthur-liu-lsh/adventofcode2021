@@ -38,7 +38,7 @@ namespace D19
 
             sw.Stop();
 
-            Console.WriteLine("Part 1 and 2:");
+            Console.WriteLine("Parts 1 and 2:");
             Console.WriteLine($"Number of beacons: {solver.GetBeaconCount()}");
             Console.WriteLine($"Biggest distance between sensors: {solver.GetMaxManhattanDistance()}");
             Console.WriteLine($"Calculations execution time: {sw.ElapsedMilliseconds} ms");
