@@ -36,9 +36,9 @@ namespace D20
 
             for (int k = 0; k < iter1; k++) {
 
-                bool invert = k%2==1;
+                bool invert = (lines[0][0] == '#') ? k%2==1 : false;
 
-                table = Padding(inputTable, invert);
+                table = Padding(table, invert);
                 n = table.GetLength(0);
                 m = table.GetLength(1);
                 bool[,] newTable = new bool[n,m];
@@ -69,7 +69,7 @@ namespace D20
 
             for (int k = 0; k < iter2; k++) {
 
-                bool invert = k%2==1;
+                bool invert = (lines[0][0] == '#') ? k%2==1 : false;
 
                 table = Padding(table, invert);
                 n = table.GetLength(0);
