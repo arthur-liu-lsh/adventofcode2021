@@ -74,7 +74,7 @@ namespace D21
             // Part 2
             sw.Restart();
 
-            // states[turn, score1, score2, pos1, pos2]
+            // states[player, score1, score2, pos1, pos2]
             long[,,,,] states = new long[2,21,21,10,10];
 
             states[0,0,0,start1-1,start2-1] = 1L;
@@ -112,6 +112,10 @@ namespace D21
             return oldValue % 100 + 1;
         }
 
+        static int Move(int oldPos, int increment) {
+            return (oldPos + increment - 1) % 10 + 1;
+        }
+
         static bool CheckEmpty(long[,,,,] table) {
             for (int i = 0; i < table.GetLength(0); i++) {
                 for (int j = 0; j < table.GetLength(1); j++) {
@@ -129,18 +133,8 @@ namespace D21
             return true;
         }
 
-        static long Count(long[,] table) {
-            long count = 0;
-            for (int i = 0; i < table.GetLength(0); i++) {
-                for (int j = 0; j < table.GetLength(1); j++) {
-                    count += table[i,j];
-                }
-            }
-            return count;
-        }
-
         static long[,,,,] PlayDirac(long[,,,,] states, Dictionary<int,int> rolls, ref long score1, ref long score2) {
-            // states[turn, score1, score2, pos1, pos2]
+            // states[player, score1, score2, pos1, pos2]
 
             int winScore = states.GetLength(1);
             int nPositions = states.GetLength(3);
@@ -150,6 +144,7 @@ namespace D21
                 for (int s2 = 0; s2 < winScore; s2++) {
                     for (int p1 = 0; p1 < nPositions; p1++) {
                         for (int p2 = 0; p2 < nPositions; p2++) {
+                            // Avoid useless operations, saves about 5/6 of the execution time (240ms -> 40ms)
                             if (states[0,s1,s2,p1,p2] == 0 && states[1,s1,s2,p1,p2] == 0) {
                                 continue;
                             }
@@ -178,8 +173,5 @@ namespace D21
             return newStates;
         }
 
-        static int Move(int oldPos, int increment) {
-            return (oldPos + increment - 1) % 10 + 1;
-        }
     }
 }
