@@ -40,10 +40,11 @@ namespace D22
                 SwitchCubes(cubes, coords[i][0], coords[i][1], coords[i][2], coords[i][3], coords[i][4], coords[i][5], states[i]);
             }
 
-            long count50 = Count(cubes, -50, 50, -50, 50, -50, 50);
-
             var sw = new Stopwatch();
             sw.Start();
+            
+            long count50 = Count(cubes, -50, 50, -50, 50, -50, 50);
+
             sw.Stop();
 
             Console.WriteLine("Part 1:");
