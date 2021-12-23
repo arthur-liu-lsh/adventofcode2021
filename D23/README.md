@@ -1,0 +1,1 @@
+This day's challenge has been completed by hand.
