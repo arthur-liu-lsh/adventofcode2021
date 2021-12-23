@@ -67,7 +67,7 @@ namespace D21
             Console.WriteLine($"Winner: Player {winnerP1}");
             Console.WriteLine($"Loser score: {loserScore}");
             Console.WriteLine($"Answer: {loserScore*rolls}");
-            Console.WriteLine($"Calculations execution time: {sw.ElapsedMilliseconds} ms");
+            Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
 
 
 
