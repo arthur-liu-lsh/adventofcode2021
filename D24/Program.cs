@@ -75,6 +75,30 @@ namespace D24
             Console.WriteLine($"Max model number: {max}");
             Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
 
+            // Part 2
+
+            sw.Restart();
+
+            int[] minArray = new int[14];
+
+            for (int i = 0; i < 7; i++) {
+                if (relations[i,2] >= 0) {
+                    maxArray[relations[i,1]] = 1;
+                    maxArray[relations[i,0]] = 1 + relations[i,2];
+                }
+                else {
+                    maxArray[relations[i,0]] = 1;
+                    maxArray[relations[i,1]] = 1 - relations[i,2];
+                }
+            }
+
+            long min = ArrayToLong(maxArray);
+
+
+            Console.WriteLine("\nPart 2:");
+            Console.WriteLine($"Min model number: {min}");
+            Console.WriteLine($"Execution time: {sw.ElapsedMilliseconds} ms");
+
             globalSw.Stop();
             Console.WriteLine($"\nTotal execution time: {globalSw.ElapsedMilliseconds} ms");
         }
